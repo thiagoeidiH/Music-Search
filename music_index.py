@@ -1,97 +1,84 @@
-from bintrees import RBTree # type: ignore
+from bintrees import RBTree  # type: ignore
 
-class MusicIndex:
+class IndiceMusical:
     def __init__(self):
-        self.primary_index = RBTree()  # Índice primário usando uma Árvore B
-        self.secondary_index_title = {}  # Índice secundário para títulos
-        self.secondary_index_artist = {}  # Índice secundário para artistas
+        self.indice_primario = RBTree()
+        self.indice_secundario_titulo = {}
+        self.indice_secundario_artista = {}
+        self.indice_secundario_album = {}  
     
-    def add_music(self, music_id, title, artist, album, file_path):
-        # Adiciona à árvore B (índice primário)
-        self.primary_index.insert(music_id, (title, artist, album, file_path))
+    def adicionar_musica(self, id_musica, titulo, artista, album):
+        self.indice_primario.insert(id_musica, (titulo, artista, album))
         
-        # Adiciona aos índices secundários
-        if title in self.secondary_index_title:
-            self.secondary_index_title[title].append(music_id)
+        if titulo in self.indice_secundario_titulo:
+            self.indice_secundario_titulo[titulo].append(id_musica)
         else:
-            self.secondary_index_title[title] = [music_id]
+            self.indice_secundario_titulo[titulo] = [id_musica]
         
-        if artist in self.secondary_index_artist:
-            self.secondary_index_artist[artist].append(music_id)
+        if artista in self.indice_secundario_artista:
+            self.indice_secundario_artista[artista].append(id_musica)
         else:
-            self.secondary_index_artist[artist] = [music_id]
-    
-    def remove_music(self, music_id):
-        # Remove da árvore B (índice primário)
-        if music_id in self.primary_index:
-            title, artist, album, file_path = self.primary_index.pop(music_id)
-            
-            # Remove dos índices secundários
-            self.secondary_index_title[title].remove(music_id)
-            if len(self.secondary_index_title[title]) == 0:
-                del self.secondary_index_title[title]
-            
-            self.secondary_index_artist[artist].remove(music_id)
-            if len(self.secondary_index_artist[artist]) == 0:
-                del self.secondary_index_artist[artist]
-    
-    # Módulo de Lógica de Busca
-    
-    def search_by_id(self, music_id):
-        """
-        Busca uma música pelo ID (índice primário).
-        """
-        return self.primary_index.get(music_id, None)
-    
-    def search_by_title(self, title):
-        """
-        Busca músicas pelo título (índice secundário).
-        Retorna uma lista de músicas que correspondem ao título.
-        """
-        music_ids = self.secondary_index_title.get(title, [])
-        return [self.primary_index[music_id] for music_id in music_ids]
-    
-    def search_by_artist(self, artist):
-        """
-        Busca músicas pelo artista (índice secundário).
-        Retorna uma lista de músicas que correspondem ao artista.
-        """
-        music_ids = self.secondary_index_artist.get(artist, [])
-        return [self.primary_index[music_id] for music_id in music_ids]
-    
-    def search_by_title_and_artist(self, title, artist):
-        """
-        Busca músicas pelo título e artista.
-        Retorna uma lista de músicas que correspondem ao título e artista.
-        """
-        title_ids = set(self.secondary_index_title.get(title, []))
-        artist_ids = set(self.secondary_index_artist.get(artist, []))
+            self.indice_secundario_artista[artista] = [id_musica]
         
-        # Intersecção de IDs para encontrar músicas que correspondem a ambos título e artista
-        matching_ids = title_ids.intersection(artist_ids)
-        return [self.primary_index[music_id] for music_id in matching_ids]
+        if album in self.indice_secundario_album:
+            self.indice_secundario_album[album].append(id_musica)
+        else:
+            self.indice_secundario_album[album] = [id_musica]
+    
+    def remover_musica(self, id_musica):
+        if id_musica in self.indice_primario:
+            titulo, artista, album = self.indice_primario.pop(id_musica)
+            
+            self.indice_secundario_titulo[titulo].remove(id_musica)
+            if len(self.indice_secundario_titulo[titulo]) == 0:
+                del self.indice_secundario_titulo[titulo]
+            
+            self.indice_secundario_artista[artista].remove(id_musica)
+            if len(self.indice_secundario_artista[artista]) == 0:
+                del self.indice_secundario_artista[artista]
 
-# Exemplo de uso do módulo de busca
-music_index = MusicIndex()
+            self.indice_secundario_album[album].remove(id_musica)
+            if len(self.indice_secundario_album[album]) == 0:
+                del self.indice_secundario_album[album]
+    
+    def buscar_por_id(self, id_musica):
+        return self.indice_primario.get(id_musica, None)
+    
+    def buscar_por_titulo(self, titulo):
+        ids_musica = self.indice_secundario_titulo.get(titulo, [])
+        return [self.indice_primario[id_musica] for id_musica in ids_musica]
+    
+    def buscar_por_artista(self, artista):
+        ids_musica = self.indice_secundario_artista.get(artista, [])
+        return [self.indice_primario[id_musica] for id_musica in ids_musica]
+    
+    def buscar_por_album(self, album):  # Nova função de busca por álbum
+        ids_musica = self.indice_secundario_album.get(album, [])
+        return [self.indice_primario[id_musica] for id_musica in ids_musica]
 
-# Adicionando músicas
-music_index.add_music(1, "Song Title 1", "Artist A", "Album X", "path/to/song1.mp3")
-music_index.add_music(2, "Song Title 2", "Artist B", "Album Y", "path/to/song2.mp3")
-music_index.add_music(3, "Song Title 1", "Artist C", "Album Z", "path/to/song3.mp3")
+    def buscar_por_titulo_e_artista(self, titulo, artista):
+        ids_titulo = set(self.indice_secundario_titulo.get(titulo, []))
+        ids_artista = set(self.indice_secundario_artista.get(artista, []))
+        ids_correspondentes = ids_titulo.intersection(ids_artista)
+        return [self.indice_primario[id_musica] for id_musica in ids_correspondentes]
 
-# Buscando por ID
-print(music_index.search_by_id(1))
+indice_musical = IndiceMusical()
 
-# Buscando por título
-print(music_index.search_by_title("Song Title 1"))
+indice_musical.adicionar_musica(1, "Scientist", "Coldplay", "A rush of blood to the head")
+indice_musical.adicionar_musica(2, "Shallow", "Lady Gaga", "A Star Is Born")
+indice_musical.adicionar_musica(3, "Poker Face", "Lady Gaga", "A Star Is Born")
+indice_musical.adicionar_musica(4, "Trem Bala", "Ana Vilela", "Ana Vilela")
 
-# Buscando por artista
-print(music_index.search_by_artist("Artist A"))
+print(indice_musical.buscar_por_id(1))
 
-# Buscando por título e artista
-print(music_index.search_by_title_and_artist("Song Title 1", "Artist A"))
+print(indice_musical.buscar_por_titulo("Shallow"))
 
-# Removendo uma música
-music_index.remove_music(2)
+print(indice_musical.buscar_por_artista("Lady Gaga"))
 
+print(indice_musical.buscar_por_album("Ana Vilela"))
 
+print(indice_musical.buscar_por_titulo_e_artista("Poker Face", "Lady Gaga"))
+
+indice_musical.remover_musica(2)
+
+print(indice_musical.buscar_por_id(2))
