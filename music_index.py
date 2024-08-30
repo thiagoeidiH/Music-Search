@@ -1,14 +1,14 @@
-from bintrees import RBTree  # type: ignore
+from BTrees.OOBTree import OOBTree 
 
 class IndiceMusical:
     def __init__(self):
-        self.indice_primario = RBTree()
+        self.indice_primario = OOBTree()  # Usando BTree ao invÃ©s de RBTree
         self.indice_secundario_titulo = {}
         self.indice_secundario_artista = {}
-        self.indice_secundario_album = {}  
+        self.indice_secundario_album = {}
     
     def adicionar_musica(self, id_musica, titulo, artista, album):
-        self.indice_primario.insert(id_musica, (titulo, artista, album))
+        self.indice_primario[id_musica] = (titulo, artista, album)
         
         if titulo in self.indice_secundario_titulo:
             self.indice_secundario_titulo[titulo].append(id_musica)
@@ -52,7 +52,7 @@ class IndiceMusical:
         ids_musica = self.indice_secundario_artista.get(artista, [])
         return [self.indice_primario[id_musica] for id_musica in ids_musica]
     
-    def buscar_por_album(self, album):  # Nova função de busca por álbum
+    def buscar_por_album(self, album):
         ids_musica = self.indice_secundario_album.get(album, [])
         return [self.indice_primario[id_musica] for id_musica in ids_musica]
 
@@ -62,6 +62,7 @@ class IndiceMusical:
         ids_correspondentes = ids_titulo.intersection(ids_artista)
         return [self.indice_primario[id_musica] for id_musica in ids_correspondentes]
 
+# Exemplo de uso:
 indice_musical = IndiceMusical()
 
 indice_musical.adicionar_musica(1, "Scientist", "Coldplay", "A rush of blood to the head")
@@ -70,15 +71,10 @@ indice_musical.adicionar_musica(3, "Poker Face", "Lady Gaga", "A Star Is Born")
 indice_musical.adicionar_musica(4, "Trem Bala", "Ana Vilela", "Ana Vilela")
 
 print(indice_musical.buscar_por_id(1))
-
 print(indice_musical.buscar_por_titulo("Shallow"))
-
 print(indice_musical.buscar_por_artista("Lady Gaga"))
-
 print(indice_musical.buscar_por_album("Ana Vilela"))
-
 print(indice_musical.buscar_por_titulo_e_artista("Poker Face", "Lady Gaga"))
 
 indice_musical.remover_musica(2)
-
 print(indice_musical.buscar_por_id(2))
